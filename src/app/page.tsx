@@ -1,113 +1,92 @@
-import Image from "next/image";
+"use client"
+import { useRef, useState } from "react"
 
-export default function Home() {
+export default function Chat() {
+  const ref = useRef();
+  const [message, setMessage] = useState<string>("");
+  const [response, setResponse] = useState<string>("");
+  const [file, setFile] = useState<any>({});
+  const [fileUploadMsg, setFileUploadMsg] = useState<string>("");
+
+  const upload = () => {
+    const url = 'http://localhost:8080/upload';
+    const formData = new FormData();
+    //data.append("file", file, file.name);
+    formData.append("file", file);
+
+    fetch(url, {
+      method: 'POST',
+      // headers: {
+      //   "Content-Type": "multipart/mixed"
+      // },
+      body: formData
+    })
+      .then(response => response.json())
+      .then(result => {
+        // Handle the response/result here
+        console.log(result);
+        setFileUploadMsg("File uploaded successfully");
+        setTimeout(() => {
+          setFileUploadMsg("");
+        }, 4000)
+        ref.current.value = "";
+      })
+      .catch(error => {
+        // Handle any error that occurs during the request
+        console.error(error);
+        setFileUploadMsg("Error");
+      });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    console.log(`Submitted request`);
+    setResponse((r) => {
+      return "Please wait retrieving response ..."
+    })
+    const response = await fetch(`http://localhost:8080/chat?question=${message}`);
+    const content = await response.text();
+    setResponse(content);
+    console.log(content);
+  }
+
+  const handleInputChange = (e) => {
+    setMessage(e.target.value);
+  }
+  const selectFile = (e: any) => {
+    setFile(e.target.files[0]);
+  }
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/app/page.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:size-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+    <main className="flex h-screen flex-col items-center justify-center">
+      <section className='chatbot-section flex flex-col origin:w-[800px] w-full origin:h-[735px] h-full rounded-md p-2 md:p-6'>
+        <div className="mb-3">
+          <label className="form-label">Please select file for RAG query:</label>
+          <input className="form-control" type="file" id="formFile" ref={ref} onChange={selectFile} />
+          <button type="button" className="btn btn-dark mt-3 mb-3" onClick={upload}>Upload</button>
         </div>
-      </div>
-
-      <div className="relative z-[-1] flex place-items-center before:absolute before:h-[300px] before:w-full before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-full after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 sm:before:w-[480px] sm:after:w-[240px] before:lg:h-[360px]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className="mb-32 grid text-center lg:mb-0 lg:w-full lg:max-w-5xl lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Docs{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Learn{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Templates{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Explore starter templates for Next.js.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Deploy{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-balance text-sm opacity-50">
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
+        <div className="mb-3">
+          <p onClick={() => setFileUploadMsg("")}>{fileUploadMsg} </p>
+        </div>
+        <div className='chatbot-header pb-6'>
+          <div className='flex justify-between'>
+            A simple RAG application using LangChain4J in the backend
+          </div>
+        </div>
+        <div className='flex-1 relative overflow-y-auto my-4 md:my-6'>
+          <textarea readOnly value={response} rows={50} cols={500}>
+          </textarea>
+        </div>
+        <form className='flex h-[40px] gap-2' onSubmit={handleSubmit}>
+          <input onChange={handleInputChange} name='input' value={message} className='chatbot-input flex-1 text-sm md:text-base outline-none bg-transparent rounded-md p-2' placeholder='Send a query ...' />
+          <button type="submit" className='chatbot-send-button flex rounded-md items-center justify-center px-2.5 origin:px-3'>
+            <svg width="20" height="20" viewBox="0 0 20 20">
+              <path d="M2.925 5.025L9.18333 7.70833L2.91667 6.875L2.925 5.025ZM9.175 12.2917L2.91667 14.975V13.125L9.175 12.2917ZM1.25833 2.5L1.25 8.33333L13.75 10L1.25 11.6667L1.25833 17.5L18.75 10L1.25833 2.5Z" />
+            </svg>
+            <span className='hidden origin:block font-semibold text-sm ml-2' onClick={handleSubmit}>Send</span>
+          </button>
+        </form>
+      </section>
     </main>
   );
 }
