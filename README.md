@@ -17,6 +17,6 @@ pnpm dev
 bun dev
 ```
 
-## Accessing appoication
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Accessing application
+Open [http://localhost:3000](http://localhost:3000) with your browser to access the chat application.
 
